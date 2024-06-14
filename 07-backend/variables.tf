@@ -14,3 +14,7 @@ variable "common_tags" {
     Component   = "backend"
   }
 }
+
+variable "zone_name" {
+  default = "daws-78s.cloud" 
+}

@@ -163,3 +163,36 @@ resource "aws_autoscaling_group" "backend" {
     propagate_at_launch = false
   }
 }
+
+# ASG policy using metric CPU utilization
+resource "aws_autoscaling_policy" "backend" {
+  name                   = "${var.project_name}-${var.environment}-${var.common_tags.Component}"
+  policy_type            = "TargetTrackingScaling" 
+  autoscaling_group_name = aws_autoscaling_group.backend.name
+
+    target_tracking_configuration {
+      predefined_metric_specification {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+
+      target_value = 10.0 # for testing purpose we are keeping 10, it need to be 75 or greater.
+    }
+}
+
+# Load balancer listener rule --> backend.app-dev.daws-78s.cloud
+resource "aws_lb_listener_rule" "backend" {
+  listener_arn = data.aws_ssm_parameter.app_alb_listener_arn.value
+  priority     = 100 # less number will be first validated
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend.arn
+  }
+
+  # we are writing rule on host path
+  condition {
+    host_header {
+      values = ["backend.app-${var.environment}.${var.zone_name}"]  # this is host path
+    }
+  }
+}
