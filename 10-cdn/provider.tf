@@ -10,7 +10,6 @@ terraform {
     key            = "expense-dev-cdn"        # key name we can give should be different for different projects
     region         = "us-east-1"                   # region where bucket is created
     dynamodb_table = "daws78s-locking"
-    
   }
 }
 
